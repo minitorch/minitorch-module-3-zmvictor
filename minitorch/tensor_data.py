@@ -43,7 +43,9 @@ def index_to_position(index: Index, strides: Strides) -> int:
         Position in storage
     """
 
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 2.1.
+    assert len(index) == len(strides)
+    return sum(i * s for i, s in zip(index, strides))
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -59,7 +61,11 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index : return index corresponding to position.
 
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 2.1.
+    # out_index.shape = shape.shape
+    for i in range(len(shape) - 1, -1, -1):
+        out_index[i] = ordinal % shape[i]
+        ordinal = ordinal // shape[i]
 
 
 def broadcast_index(
@@ -81,7 +87,14 @@ def broadcast_index(
     Returns:
         None
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 2.2.
+    assert len(big_index) == len(big_shape)
+    assert len(shape) <= len(big_shape)
+    for i in range(-1, -len(shape) - 1, -1):
+        if shape[i] == 1:
+            out_index[i] = 0
+        else:
+            out_index[i] = big_index[i]
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -98,7 +111,23 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     Raises:
         IndexingError : if cannot broadcast
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 2.2.
+    if len(shape2) > len(shape1):
+        shape1, shape2 = shape2, shape1
+    shape1 = list(reversed(shape1))
+    shape2 = list(reversed(shape2))
+    us = []
+    for i in range(len(shape2)):
+        if shape1[i] == shape2[i]:
+            us.append(shape1[i])
+        elif shape1[i] == 1:
+            us.append(shape2[i])
+        elif shape2[i] == 1:
+            us.append(shape1[i])
+        else:
+            raise IndexingError(f"Cannot broadcast {shape1} and {shape2}")
+    us.extend(shape1[len(shape2):])
+    return tuple(reversed(us))
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
@@ -209,7 +238,7 @@ class TensorData:
         Permute the dimensions of the tensor.
 
         Args:
-            *order: a permutation of the dimensions
+            order (list): a permutation of the dimensions
 
         Returns:
             New `TensorData` with the same storage and a new dimension order.
@@ -218,7 +247,13 @@ class TensorData:
             range(len(self.shape))
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
-        raise NotImplementedError("Need to include this file from past assignment.")
+        # TODO: Implement for Task 2.1.
+        storage = self._storage
+        shape = self._shape
+        new_shape = tuple(shape[i] for i in order)
+        new_strides = tuple(self._strides[i] for i in order)
+        return TensorData(storage, new_shape, new_strides)
+        
 
     def to_string(self) -> str:
         s = ""
