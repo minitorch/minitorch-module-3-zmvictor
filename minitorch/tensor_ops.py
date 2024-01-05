@@ -45,7 +45,7 @@ class TensorOps:
 
     @staticmethod
     def matrix_multiply(a: Tensor, b: Tensor) -> Tensor:
-        raise NotImplementedError("Not implemented in this assignment")
+        pass
 
     cuda = False
 
@@ -223,12 +223,101 @@ class SimpleOps(TensorOps):
 
     @staticmethod
     def matrix_multiply(a: "Tensor", b: "Tensor") -> "Tensor":
-        raise NotImplementedError("Not implemented in this assignment")
+        # a_storage, a_shape, a_strides = a.tuple()
+        # b_storage, b_shape, b_strides = b.tuple()
+        # out = a.zeros((a_shape[0], b_shape[1]))
+        # out_storage, out_shape, out_strides = out.tuple()
+        # for i in range(a_shape[0]):
+        #     for j in range(b_shape[1]):
+        #         idx = i * out_strides[0] + j * out_strides[1]
+        #         for k in range(a_shape[1]):
+        #             out_storage[idx] += a_storage[i * a_strides[0] + k * a_strides[1]] * b_storage[k * b_strides[0] + j * b_strides[1]]
+        # return out
+        ls = list(shape_broadcast(a.shape[:-2], b.shape[:-2]))
+        ls.append(a.shape[-2])
+        ls.append(b.shape[-1])
+        assert a.shape[-1] == b.shape[-2]
+        # END CODE CHANGE
+        out = a.zeros(tuple(ls))
+
+        # Call main function
+        tensor_matrix_multiply(*out.tuple(), *a.tuple(), *b.tuple())
+        return out
 
     is_cuda = False
 
 
+def tensor_matrix_multiply(
+    out,
+    out_shape,
+    out_strides,
+    a_storage,
+    a_shape,
+    a_strides,
+    b_storage,
+    b_shape,
+    b_strides,
+):
+    """
+    NUMBA tensor matrix multiply function.
+
+    Should work for any tensor shapes that broadcast as long as ::
+
+        assert a_shape[-1] == b_shape[-2]
+
+    Args:
+        out (array): storage for `out` tensor
+        out_shape (array): shape for `out` tensor
+        out_strides (array): strides for `out` tensor
+        a_storage (array): storage for `a` tensor
+        a_shape (array): shape for `a` tensor
+        a_strides (array): strides for `a` tensor
+        b_storage (array): storage for `b` tensor
+        b_shape (array): shape for `b` tensor
+        b_strides (array): strides for `b` tensor
+
+    Returns:
+        None : Fills in `out`
+    """
+    # out,
+    # out_shape,
+    # out_strides,
+    # print("a")
+    # for mm in a_shape:
+    #     print(mm)
+
+    # print("b")
+    # for mm in b_shape:
+    #     print(mm)
+    # print("a")
+    # print(len(out_shape))
+
+    iteration_n = a_shape[-1]
+
+    for i in range(len(out)):
+        out_index = np.zeros(MAX_DIMS, np.int32)
+        to_index(i, out_shape, out_index)
+        o = index_to_position(out_index, out_strides)
+        a_index = np.copy(out_index)
+        b_index = np.zeros(MAX_DIMS, np.int32)
+        a_index[len(out_shape) - 1] = 0
+        b_index[len(out_shape) - 2] = 0
+        b_index[len(out_shape) - 1] = out_index[len(out_shape) - 1]
+        temp_sum = 0
+        for w in range(iteration_n):
+            # a_index = [d,a_row,w]
+            # b_index = [0,w,b_col]
+            a_index[len(out_shape) - 1] = w
+            b_index[len(out_shape) - 2] = w
+
+            j = index_to_position(a_index, a_strides)
+            m = index_to_position(b_index, b_strides)
+            temp_sum = temp_sum + a_storage[j] * b_storage[m]
+
+        out[o] = temp_sum
+
 # Implementations.
+
 
 
 def tensor_map(fn: Callable[[float], float]) -> Any:

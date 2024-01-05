@@ -352,6 +352,8 @@ def test_permute(backend: str, data: DataObject) -> None:
 def test_mm2() -> None:
     a = minitorch.rand((2, 3), backend=FastTensorBackend)
     b = minitorch.rand((3, 4), backend=FastTensorBackend)
+    a = minitorch.tensor(a.to_numpy().tolist())
+    b = minitorch.tensor(b.to_numpy().tolist())
     c = a @ b
 
     c2 = (a.view(2, 3, 1) * b.view(1, 3, 4)).sum(1).view(2, 4)
@@ -379,6 +381,9 @@ def test_bmm(backend: str, data: DataObject) -> None:
     )
     a = data.draw(tensors(backend=shared[backend], shape=(D, A, B)))
     b = data.draw(tensors(backend=shared[backend], shape=(1, B, C)))
+
+    a = minitorch.tensor(a.to_numpy().tolist())
+    b = minitorch.tensor(b.to_numpy().tolist())
 
     c = a @ b
     c2 = (

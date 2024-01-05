@@ -44,7 +44,7 @@ def index_to_position(index: Index, strides: Strides) -> int:
     """
 
     # TODO: Implement for Task 2.1.
-    assert len(index) == len(strides)
+    # assert len(index) == len(strides)
     # return sum(i * s for i, s in zip(index, strides))
     ret = 0
     for i, s in zip(index, strides):
@@ -92,13 +92,11 @@ def broadcast_index(
         None
     """
     # TODO: Implement for Task 2.2.
-    assert len(big_index) == len(big_shape)
-    assert len(shape) <= len(big_shape)
-    for i in range(-1, -len(shape) - 1, -1):
-        if shape[i] == 1:
-            out_index[i] = 0
+    for i, s in enumerate(shape):
+        if s > 1:
+            out_index[i] = big_index[i + (len(big_shape) - len(shape))]
         else:
-            out_index[i] = big_index[i]
+            out_index[i] = 0
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
