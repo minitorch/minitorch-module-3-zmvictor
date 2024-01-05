@@ -223,21 +223,13 @@ class SimpleOps(TensorOps):
 
     @staticmethod
     def matrix_multiply(a: "Tensor", b: "Tensor") -> "Tensor":
-        # a_storage, a_shape, a_strides = a.tuple()
-        # b_storage, b_shape, b_strides = b.tuple()
-        # out = a.zeros((a_shape[0], b_shape[1]))
-        # out_storage, out_shape, out_strides = out.tuple()
-        # for i in range(a_shape[0]):
-        #     for j in range(b_shape[1]):
-        #         idx = i * out_strides[0] + j * out_strides[1]
-        #         for k in range(a_shape[1]):
-        #             out_storage[idx] += a_storage[i * a_strides[0] + k * a_strides[1]] * b_storage[k * b_strides[0] + j * b_strides[1]]
-        # return out
         ls = list(shape_broadcast(a.shape[:-2], b.shape[:-2]))
         ls.append(a.shape[-2])
         ls.append(b.shape[-1])
         assert a.shape[-1] == b.shape[-2]
-        # END CODE CHANGE
+        print("a shape: ", a.shape)
+        print("b shape: ", b.shape)
+        print("out shape: ", ls)
         out = a.zeros(tuple(ls))
 
         # Call main function
@@ -279,21 +271,7 @@ def tensor_matrix_multiply(
     Returns:
         None : Fills in `out`
     """
-    # out,
-    # out_shape,
-    # out_strides,
-    # print("a")
-    # for mm in a_shape:
-    #     print(mm)
-
-    # print("b")
-    # for mm in b_shape:
-    #     print(mm)
-    # print("a")
-    # print(len(out_shape))
-
     iteration_n = a_shape[-1]
-
     for i in range(len(out)):
         out_index = np.zeros(MAX_DIMS, np.int32)
         to_index(i, out_shape, out_index)
@@ -315,6 +293,8 @@ def tensor_matrix_multiply(
             temp_sum = temp_sum + a_storage[j] * b_storage[m]
 
         out[o] = temp_sum
+        
+    return out
 
 # Implementations.
 
