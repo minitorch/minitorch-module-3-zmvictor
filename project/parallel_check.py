@@ -1,3 +1,8 @@
+import os, sys
+
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(cur_dir + "/../")
+
 from numba import njit
 
 import minitorch

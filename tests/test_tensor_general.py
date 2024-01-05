@@ -61,6 +61,7 @@ def test_one_args(
 ) -> None:
     "Run forward for all one arg functions above."
     t1 = data.draw(tensors(backend=shared[backend]))
+    t1 = minitorch.tensor(t1.to_numpy().tolist())
     name, base_fn, tensor_fn = fn
     t2 = tensor_fn(t1)
     for ind in t2._tensor.indices():
@@ -78,6 +79,8 @@ def test_two_args(
 ) -> None:
     "Run forward for all two arg functions above."
     t1, t2 = data.draw(shaped_tensors(2, backend=shared[backend]))
+    t1 = minitorch.tensor(t1.to_numpy().tolist())
+    t2 = minitorch.tensor(t2.to_numpy().tolist())
     name, base_fn, tensor_fn = fn
     t3 = tensor_fn(t1, t2)
     for ind in t3._tensor.indices():
@@ -94,6 +97,7 @@ def test_one_derivative(
 ) -> None:
     "Run backward for all one arg functions above."
     t1 = data.draw(tensors(backend=shared[backend]))
+    t1 = minitorch.tensor(t1.to_numpy().tolist())
     name, _, tensor_fn = fn
     grad_check(tensor_fn, t1)
 
@@ -109,6 +113,8 @@ def test_two_grad(
 ) -> None:
     "Run backward for all two arg functions above."
     t1, t2 = data.draw(shaped_tensors(2, backend=shared[backend]))
+    t1 = minitorch.tensor(t1.to_numpy().tolist())
+    t2 = minitorch.tensor(t2.to_numpy().tolist())
     name, _, tensor_fn = fn
     grad_check(tensor_fn, t1, t2)
 
@@ -124,6 +130,7 @@ def test_reduce(
 ) -> None:
     "Run backward for all reduce functions above."
     t1 = data.draw(tensors(backend=shared[backend]))
+    t1 = minitorch.tensor(t1.to_numpy().tolist())
     name, _, tensor_fn = fn
     grad_check(tensor_fn, t1)
 
@@ -315,6 +322,8 @@ def test_two_grad_broadcast(
 ) -> None:
     "Run backward for all two arg functions above with broadcast."
     t1, t2 = data.draw(shaped_tensors(2, backend=shared[backend]))
+    t1 = minitorch.tensor(t1.to_numpy().tolist())
+    t2 = minitorch.tensor(t2.to_numpy().tolist())
     name, base_fn, tensor_fn = fn
 
     grad_check(tensor_fn, t1, t2)
@@ -330,6 +339,7 @@ def test_two_grad_broadcast(
 def test_permute(backend: str, data: DataObject) -> None:
     "Check permutations for all backends."
     t1 = data.draw(tensors(backend=shared[backend]))
+    t1 = minitorch.tensor(t1.to_numpy().tolist())
     permutation = data.draw(permutations(range(len(t1.shape))))
 
     def permute(a: Tensor) -> Tensor:
