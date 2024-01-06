@@ -233,7 +233,7 @@ if numba.cuda.is_available():
         x = minitorch.tensor(x1, backend=shared["cuda"])
         y = minitorch.tensor(y1, backend=shared["cuda"])
         z2 = x @ y
-
+        
         for i in range(2):
             for j in range(2):
                 assert_close(z[i, j], z2[i, j])
@@ -381,8 +381,8 @@ def test_bmm(backend: str, data: DataObject) -> None:
     a = data.draw(tensors(backend=shared[backend], shape=(D, A, B)))
     b = data.draw(tensors(backend=shared[backend], shape=(1, B, C)))
 
-    a = minitorch.tensor(a.to_numpy().tolist())
-    b = minitorch.tensor(b.to_numpy().tolist())
+    # a = minitorch.tensor(a.to_numpy().tolist())
+    # b = minitorch.tensor(b.to_numpy().tolist())
 
     c = a @ b
     c2 = (
