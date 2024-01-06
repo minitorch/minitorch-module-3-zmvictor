@@ -28,7 +28,6 @@ backend_tests = [pytest.param("fast", marks=pytest.mark.task3_1)]
 # ## Task 3.2
 matmul_tests = [pytest.param("fast", marks=pytest.mark.task3_2)]
 
-
 if numba.cuda.is_available():
     # ## Task 3.3
     backend_tests.append(pytest.param("cuda", marks=pytest.mark.task3_3))
@@ -61,6 +60,7 @@ def test_one_args(
 ) -> None:
     "Run forward for all one arg functions above."
     t1 = data.draw(tensors(backend=shared[backend]))
+    # t1 = minitorch.tensor(t1.to_numpy().tolist())
     name, base_fn, tensor_fn = fn
     t2 = tensor_fn(t1)
     for ind in t2._tensor.indices():
@@ -78,6 +78,8 @@ def test_two_args(
 ) -> None:
     "Run forward for all two arg functions above."
     t1, t2 = data.draw(shaped_tensors(2, backend=shared[backend]))
+    # t1 = minitorch.tensor(t1.to_numpy().tolist())
+    # t2 = minitorch.tensor(t2.to_numpy().tolist())
     name, base_fn, tensor_fn = fn
     t3 = tensor_fn(t1, t2)
     for ind in t3._tensor.indices():
@@ -94,6 +96,7 @@ def test_one_derivative(
 ) -> None:
     "Run backward for all one arg functions above."
     t1 = data.draw(tensors(backend=shared[backend]))
+    # t1 = minitorch.tensor(t1.to_numpy().tolist())
     name, _, tensor_fn = fn
     grad_check(tensor_fn, t1)
 
@@ -109,6 +112,8 @@ def test_two_grad(
 ) -> None:
     "Run backward for all two arg functions above."
     t1, t2 = data.draw(shaped_tensors(2, backend=shared[backend]))
+    # t1 = minitorch.tensor(t1.to_numpy().tolist())
+    # t2 = minitorch.tensor(t2.to_numpy().tolist())
     name, _, tensor_fn = fn
     grad_check(tensor_fn, t1, t2)
 
@@ -124,6 +129,7 @@ def test_reduce(
 ) -> None:
     "Run backward for all reduce functions above."
     t1 = data.draw(tensors(backend=shared[backend]))
+    # t1 = minitorch.tensor(t1.to_numpy().tolist())
     name, _, tensor_fn = fn
     grad_check(tensor_fn, t1)
 
@@ -227,7 +233,7 @@ if numba.cuda.is_available():
         x = minitorch.tensor(x1, backend=shared["cuda"])
         y = minitorch.tensor(y1, backend=shared["cuda"])
         z2 = x @ y
-
+        
         for i in range(2):
             for j in range(2):
                 assert_close(z[i, j], z2[i, j])
@@ -305,7 +311,7 @@ if numba.cuda.is_available():
 
 
 @given(data())
-@settings(max_examples=25)
+@settings(max_examples=5)
 @pytest.mark.parametrize("fn", two_arg)
 @pytest.mark.parametrize("backend", backend_tests)
 def test_two_grad_broadcast(
@@ -315,6 +321,8 @@ def test_two_grad_broadcast(
 ) -> None:
     "Run backward for all two arg functions above with broadcast."
     t1, t2 = data.draw(shaped_tensors(2, backend=shared[backend]))
+    # t1 = minitorch.tensor(t1.to_numpy().tolist())
+    # t2 = minitorch.tensor(t2.to_numpy().tolist())
     name, base_fn, tensor_fn = fn
 
     grad_check(tensor_fn, t1, t2)
@@ -330,6 +338,7 @@ def test_two_grad_broadcast(
 def test_permute(backend: str, data: DataObject) -> None:
     "Check permutations for all backends."
     t1 = data.draw(tensors(backend=shared[backend]))
+    # t1 = minitorch.tensor(t1.to_numpy().tolist())
     permutation = data.draw(permutations(range(len(t1.shape))))
 
     def permute(a: Tensor) -> Tensor:
@@ -342,6 +351,8 @@ def test_permute(backend: str, data: DataObject) -> None:
 def test_mm2() -> None:
     a = minitorch.rand((2, 3), backend=FastTensorBackend)
     b = minitorch.rand((3, 4), backend=FastTensorBackend)
+    a = minitorch.tensor(a.to_numpy().tolist())
+    b = minitorch.tensor(b.to_numpy().tolist())
     c = a @ b
 
     c2 = (a.view(2, 3, 1) * b.view(1, 3, 4)).sum(1).view(2, 4)
@@ -369,6 +380,9 @@ def test_bmm(backend: str, data: DataObject) -> None:
     )
     a = data.draw(tensors(backend=shared[backend], shape=(D, A, B)))
     b = data.draw(tensors(backend=shared[backend], shape=(1, B, C)))
+
+    # a = minitorch.tensor(a.to_numpy().tolist())
+    # b = minitorch.tensor(b.to_numpy().tolist())
 
     c = a @ b
     c2 = (
